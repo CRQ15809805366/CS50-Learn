@@ -1,0 +1,92 @@
+# CS50 specific files
+.cs50.yml
+.devcontainer.json
+
+# Compiled output
+*.o
+*.out
+*.exe
+*.a
+*.so
+*.obj
+*.dll
+a.out
+
+# Debug files
+*.dSYM/
+*.su
+*.idb
+*.pdb
+
+# Editor directories and files
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# Docker related
+.docker/
+docker-compose.override.yml
+
+# Dependencies
+vendor/
+node_modules/
+
+# Logs and temporary files
+*.log
+*.tmp
+tmp/
+logs/
+
+# Environment files
+.env
+.env.*
+!.env.example
+
+# OS specific files
+# macOS
+.DS_Store
+.AppleDouble
+.LSOverride
+
+# Windows
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+.pytest_cache/
+.coverage
+htmlcov/
+venv/
+ENV/
+
+# C specific
+# Prerequisites
+*.d
+
+# Object files
+*.ko
+*.elf
+
+# Libraries
+*.lib
+*.la
+*.lo
+
+# Shared objects
+*.dylib
+
+# Executables
+*.app
+*.i*86
+*.x86_64
+*.hex
+
+# Core dumps
+core
+
