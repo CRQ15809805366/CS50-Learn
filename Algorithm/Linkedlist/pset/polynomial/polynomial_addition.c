@@ -14,6 +14,7 @@ void inputPoly(Link head);                             // 用于从控制台读�
 void print(Link head);                                 // 打印链表用的函数
 bool insert(Link head, int coefficient, int exp);      // 向链表插入一个元素的函数
 void combin2List(Link heada, Link headb, Link headab); // 合并两个链表
+void clearList(Link head);                             // 释放链表
 
 int main()
 {
@@ -40,6 +41,10 @@ int main()
     combin2List(headA, headB, headAB);
     printf("合并后");
     print(headAB);
+
+    clearList(headA);
+    clearList(headB);
+    clearList(headAB);
     return 0;
 }
 
@@ -89,21 +94,21 @@ bool insert(Link head, int coefficient, int exp)
         while (p != NULL)
         {
             // 如果node节点的指数比p节点的指数大，则插在p的前面，完成插入后，提前退出
-            if (node->coefficient > p->coefficient)
+            if (node->exp > p->exp)
             {
                 q->next = node;
                 node->next = p;
                 return true;
             }
             // 如果node节点的指数和p节点的指数相等，则合并这个多项式节点，提前退出
-            if (node->coefficient == p->coefficient)
+            if (node->exp == p->exp)
             {
                 p->coefficient += node->coefficient;
                 free(node);
                 return true;
             }
             // 如果node节点的指数比p节点的指数小，继续向后移动指针（依然保持p，q一前一后）
-            if (node->coefficient > p->coefficient)
+            if (node->exp < p->exp)
             {
                 q = p;
                 p = p->next;
@@ -126,10 +131,10 @@ bool insert(Link head, int coefficient, int exp)
  * @details
 ①　通过指针访问链表
 ②　多重条件语句嵌套
-③　数字转换为字符串函数itoa
+③　数字转换为字符串函数sprintf
 ④　标志是否为第一个节点的flag的设置
 ⑤　字符串连接函数strcat
-⑥　字符串清空函数memset。memset(item,0,20);清空长20的字符串item
+⑥　字符串清空函数memset. memset(item,0,20); 清空长20的字符串item
  *
  * @param head 指向多项式链表头节点的指针
  * @return 无返回值，直接输出到标准输出
@@ -147,34 +152,58 @@ void print(Link head)
     }
     // 不是空表
     char item[20] = "";  // 要打印的当前多项式的一项
-    char number[7] = ""; // 暂时存放系数转换成的字符串
+    char number[7] = ""; // 暂时存放系数/指数转换成的字符串
 
     bool isFirstItem = true; // 标志是否为第一个节点的flag
     // 打印节点
     do
     {
-        memset(item, 0, 20); // 清空字符串item
-        // 如果是第一项，不要打+号
-        if (isFirstItem)
+        memset(item, 0, sizeof(item)); // 清空字符串item
+
+        /*处理符号*/
+        // 第一项 & 系数正 -> 不打符号
+        // 第一项 & 系数负 -> 不打符号(系数自带符号)
+        // 非首项 & 系数正 -> 打正号
+        // 非首项 & 系数负 -> 不打符号(系数自带符号)
+        if ((!isFirstItem) && (p->coefficient > 0))
+            strcat(item, "+");
+
+        /*处理系数*/
+        // 系数为1 -> 不打系数
+        // 系数为-1 -> 打印负号
+        // 系数为0 -> 不打系数
+        // 系数不为0, 1或-1 -> 打印系数
+        if (p->coefficient == -1)
+            strcat(item, "-");
+        else if ((p->coefficient != 1) && (p->coefficient != -1) && (p->coefficient != 0))
         {
-            
+            sprintf(number, "%d", p->coefficient); // 先转换整数到 number
+            strcat(item, number);                  // 再追加到 item 里
         }
 
-        // 如果不是第一项，且系数为正数，要打加号
+        /*处理常数项*/
+        // 如果指数为0
+        if (p->exp == 0)
+        {
+            // 系数是-1或1 -> 打1(负号已打完)
+            if (p->coefficient == -1 || p->coefficient == 1)
+                strcat(item, "1");
+            // 系数不为1或-1 -> 不打x与指数
+        }
 
-        // 如果系数为负数，系数自身带有符号
+        /*处理x*/
+        // 指数不为0, 系数不为0
+        if ((p->exp != 0) && (p->coefficient != 0))
+            strcat(item, "x"); // 打印x
 
-        // 如果系数为1，不用打系数
-        // 系数为-1打印负号
-
-        // 如果系数不为1或-1，打印系数
-
-        // 如果指数为0，直接打系数不用打x^和指数
-        // 如果系数是-1或1，需要打1出来，不能只打符号
-
-        // 指数不为0
-        // 打印x
-        // 如果指数为1，不打指数，否则打指数
+        /*处理指数*/
+        // 如果指数为0或1, 或系数为0，不打指数，否则打指数
+        if ((p->exp != 0) && (p->exp != 1) && (p->coefficient != 0))
+        {
+            strcat(item, "^");
+            sprintf(number, "%d", p->exp); // 先转换整数到 number
+            strcat(item, number);          // 再追加到 item 里
+        }
 
         printf("%s", item);  // 打印当前节点代表的项
         p = p->next;         // 指向下个结点
@@ -197,18 +226,48 @@ void combin2List(Link heada, Link headb, Link headab)
     while (pa != NULL && pb != NULL) // a,b链表都没有没有访问完毕
     {
         // 如果指数a>指数b，a节点插入ab链表，a指针后移
+        if (pa->exp > pb->exp)
+        {
+            insert(headab, pa->coefficient, pa->exp);
+            pa = pa->next;
+        }
         // 如果指数a<指数b，b节点插入ab链表，b指针后移
+        if (pa->exp < pb->exp)
+        {
+            insert(headab, pb->coefficient, pb->exp);
+            pb = pb->next;
+        }
         // 如果指数a==指数b，a、b系数相加，插入ab链表，a、b指针后移
-        //......
+        if (pa->exp == pb->exp)
+        {
+            if ((pa->coefficient + pb->coefficient) != 0)
+                insert(headab, (pa->coefficient + pb->coefficient), pa->exp);
+            pa = pa->next;
+            pb = pb->next;
+        }
     }
     // 如果a、b链表还有尾巴，将它加到ab链表后面
     while (pa != NULL)
     {
-        //......
+        insert(headab, pa->coefficient, pa->exp);
+        pa = pa->next;
     }
     while (pb != NULL)
     {
-        //.......
+        insert(headab, pa->coefficient, pa->exp);
+        pa = pa->next;
     }
     return;
+}
+
+void clearList(Link head)
+{
+    Link p = head->next;
+    while (p != NULL)
+    {
+        head->next = p->next;
+        free(p);
+        p = head->next;
+    }
+    free(head);
 }
