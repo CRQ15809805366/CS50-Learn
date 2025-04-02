@@ -8,10 +8,10 @@ int main()
     cout << "输入栈的大小: ";
     int size;
     cin >> size;
+    cin.ignore(); // 清除cin >> size后留下的换行符
     Stack s(size);
 
     cout << "输入待处理的字符串 (输入<代表退一格, 输入@代表清除到行首, 输入#结束) :" << endl;
-    getchar(); // 清除endl的输入缓冲区污染, 避免被getchar读取为'\n'
     char ch;
     bool shouldContinue = true;
     while (shouldContinue)
