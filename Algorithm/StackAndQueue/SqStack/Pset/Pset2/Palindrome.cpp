@@ -1,37 +1,59 @@
 #include "Stack.h"
 #include <iostream>
+#include <string.h>
 
-bool isPalindromic(Stack& str);
+using namespace std;
+
+bool isPalindromic(Stack *reverseStr, char *sourceStr);
 
 int main()
 {
-    Stack str(MAX_SIZE);
+    Stack *str = new Stack(MAX_SIZE);
 
-    cout << "输入字符串 :" << endl;
-    getchar(); // 清除endl的输入缓冲区污染, 避免被后续getchar读取为'\n'
+    cout << "输入字符串:" << endl;
+    getchar(); // 清除缓冲区
+
     char ch;
+    char sourceString[MAX_SIZE] = {'\0'}; // 存储原始输入
+    int count = 0;               // 用于存储字符个数
+
     while (true)
     {
-        // 将一行输入全部压入栈
-        while ((ch = getchar()) != '\n')
+        // 读取输入并存入栈和数组
+        while ((ch = getchar()) != '\n' && count < MAX_SIZE - 1)
         {
-            str.push(ch);
+            str->push(ch);
+            sourceString[count++] = ch;
         }
-        
-        // 判断堆栈内的字符串是否为回文串
-        if (isPalindromic(str))
+
+        // 判断是否是回文
+        if (isPalindromic(str, sourceString))
             cout << "该字符串为回文串" << endl;
         else
             cout << "该字符串非回文串" << endl;
 
-        // "清空"栈(将栈顶归位, 但储存不动), 准备储存下一行
-        str.setNull(); 
+        // 清空栈，重置数组
+        str->setNull();
+        memset(sourceString, '\0', MAX_SIZE); // 清零所有
+        count = 0;
     }
-    
+
+    delete str;
     return 0;
 }
 
-bool isPalindromic(Stack& str)
+bool isPalindromic(Stack *reverseStr, char *sourceStr)
 {
+    if (reverseStr->isEmpty())
+        return false; // 防止空栈访问
 
+    char poppedChars[MAX_SIZE] = {'\0'};
+    int i = 0;
+
+    while (!reverseStr->isEmpty())
+    {
+        poppedChars[i++] = reverseStr->pop();
+    }
+
+    return (strcmp(poppedChars, sourceStr) == 0);
 }
